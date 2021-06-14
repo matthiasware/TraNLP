@@ -117,3 +117,31 @@ class MultiHeadAttention(nn.Module):
         # (b, l, v) -> (b, l, v) where v == d_model right now
         output = self.output_norm(x + output)
         return output, attn
+
+
+class PoswiseFeedForwardNet(nn.Module):
+    def __init__(self, d_model, d_ff):
+        super(PoswiseFeedForwardNet, self).__init__()
+        self.d_model = d_model
+        self.d_ff = d_ff
+        self.fc1 = nn.Linear(d_model, d_ff)
+        self.fc2 = nn.Linear(d_ff, d_model)
+        self.gelu = torch.nn.GELU()
+
+    def forward(self, x):
+        # (b, l, m) -> (b, l, d_ff) -> (b, l, m)
+        out = self.fc1(x)
+        out = self.gelu(out)
+        out = self.fc2(out)
+        return out
+
+
+class GELU(nn.Module):
+    """
+    Paper Section 3.4, last paragraph notice that BERT used the GELU instead of RELU
+    https://paperswithcode.com/method/gelu
+    """
+
+    def forward(self, x):
+        return x * 0.5 * (1.0 + torch.erf(x / np.sqrt(2.0)))
+        # return 0.5 * x * (1 + torch.tanh(math.sqrt(2 / math.pi) * (x + 0.044715 * torch.pow(x, 3))))
