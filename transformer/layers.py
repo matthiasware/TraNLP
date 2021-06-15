@@ -136,12 +136,13 @@ class PoswiseFeedForwardNet(nn.Module):
         return out
 
 
-class GELU(nn.Module):
-    """
-    Paper Section 3.4, last paragraph notice that BERT used the GELU instead of RELU
-    https://paperswithcode.com/method/gelu
-    """
+class AttentionEncoder(nn.Module):
+    def __init__(self, d_model, d_k, d_v, n_heads, d_ff):
+        super(AttentionEncoder, self).__init__()
+        self.enc_self_attn = MultiHeadAttention(d_model, d_k, d_v, n_heads)
+        self.pos_ffn = PoswiseFeedForwardNet(d_model, d_ff)
 
-    def forward(self, x):
-        return x * 0.5 * (1.0 + torch.erf(x / np.sqrt(2.0)))
-        # return 0.5 * x * (1 + torch.tanh(math.sqrt(2 / math.pi) * (x + 0.044715 * torch.pow(x, 3))))
+    def forward(self, x, attn_mask):
+        enc_outputs, attn = self.enc_self_attn(x, attn_mask)
+        enc_outputs = self.pos_ffn(enc_outputs)
+        return enc_outputs, attn
