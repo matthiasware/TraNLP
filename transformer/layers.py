@@ -23,6 +23,7 @@ class Embedding(nn.Module):
     def forward(self, x):
         seq_len = x.size(1)
         pos = torch.arange(seq_len, dtype=torch.long)
+        pos = pos.to(x.device)
         # (seq_len,) -> (batch_size, seq_len)
         pos = pos.unsqueeze(0).expand_as(x)
         embedding = self.tok_emb(x) + self.pos_emb(pos)

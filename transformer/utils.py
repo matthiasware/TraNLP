@@ -14,6 +14,10 @@ def get_attn_mask(x, n_heads=None):
         mask = mask.unsqueeze(1).repeat(1, n_heads, 1, 1)
     return mask
 
+
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
 # def get_attn_pad_mask(x):
 #     batch_size, d_sentence = x.size()
 #     pad_attn_mask = (x == 0).unsqueeze(1).repeat(1, d_sentence, 1)
